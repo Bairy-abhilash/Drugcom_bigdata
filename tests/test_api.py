@@ -244,7 +244,7 @@ class TestAPIValidation(unittest.TestCase):
             safety = data.get("safety_level")
             
             if safety is not None:
-                self.assertIn(safety, ["safe", "caution", "danger"])
+                self.assertIn(safety, ["Safe", "Caution", "Danger"])
 
 
 if __name__ == '__main__':
