@@ -133,7 +133,9 @@ class DatabaseManager:
                 for command in sql_commands.split(';'):
                     command = command.strip()
                     if command:
-                        connection.execute(command)
+                        from sqlalchemy import text
+                        connection.execute(text(command))
+
                 connection.commit()
             
             logger.info(f"SQL file executed successfully: {sql_file_path}")
