@@ -117,24 +117,26 @@ class DatabaseManager:
             logger.error(f"Failed to drop tables: {e}")
             raise
     
-    def execute_sql_file(self, sql_file_path: str) -> None:
-        """
-        Execute SQL commands from a file.
-        
-        Args:
-            sql_file_path: Path to SQL file
-        """
-        try:
-            with open(sql_file_path, 'r') as f:
-                sql_commands = f.read()
-            
-            with self.engine.connect() as connection:
-                # Split by semicolon and execute each statement
-                for command in sql_commands.split(';'):
-                    command = command.strip()
-                    if command:
-                        from sqlalchemy import text
-                        connection.execute(text(command))
+    from sqlalchemy import text
+
+def execute_sql_file(self, sql_file_path: str) -> None:
+    """
+    Execute SQL commands from a file.
+    
+    Args:
+        sql_file_path: Path to SQL file
+    """
+    try:
+        with open(sql_file_path, 'r', encoding='utf-8') as f:
+            sql = f.read()
+
+        with self.engine.begin() as connection:
+            connection.execute(text(sql))
+
+    except Exception as e:
+        self.logger.error(f"Failed to execute SQL file: {e}")
+        raise
+
 
                 connection.commit()
             
