@@ -136,9 +136,6 @@ def execute_sql_file(self, sql_file_path: str) -> None:
     except Exception as e:
         self.logger.error(f"Failed to execute SQL file: {e}")
         raise
-
-
-                connection.commit()
             
             logger.info(f"SQL file executed successfully: {sql_file_path}")
         except Exception as e:
