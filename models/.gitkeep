@@ -1,0 +1,2 @@
+# This directory stores trained GNN model weights
+# .gitkeep ensures the directory is tracked by git
