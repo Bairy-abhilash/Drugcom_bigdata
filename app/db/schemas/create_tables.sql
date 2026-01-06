@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS drugs (
 );
 
 -- Create index on drug_name for faster searches
-CREATE INDEX idx_drugs_name ON drugs(drug_name);
-CREATE INDEX idx_drugs_drugbank_id ON drugs(drugbank_id);
+CREATE INDEX IF NOT EXISTS idx_drugs_name ON drugs(drug_name);
+CREATE INDEX IF NOT EXISTS idx_drugs_drugbank_id ON drugs(drugbank_id);
 
 -- Targets table
 CREATE TABLE IF NOT EXISTS targets (
@@ -36,8 +36,8 @@ CREATE TABLE IF NOT EXISTS targets (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_targets_gene_name ON targets(gene_name);
-CREATE INDEX idx_targets_uniprot_id ON targets(uniprot_id);
+CREATE INDEX IF NOT EXISTS idx_targets_gene_name ON targets(gene_name);
+CREATE INDEX IF NOT EXISTS idx_targets_uniprot_id ON targets(uniprot_id);
 
 -- Diseases table
 CREATE TABLE IF NOT EXISTS diseases (
@@ -51,8 +51,8 @@ CREATE TABLE IF NOT EXISTS diseases (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_diseases_name ON diseases(disease_name);
-CREATE INDEX idx_diseases_type ON diseases(disease_type);
+CREATE INDEX IF NOT EXISTS idx_diseases_name ON diseases(disease_name);
+CREATE INDEX IF NOT EXISTS idx_diseases_type ON diseases(disease_type);
 
 -- Drug-Target relationships
 CREATE TABLE IF NOT EXISTS drug_targets (
@@ -66,8 +66,8 @@ CREATE TABLE IF NOT EXISTS drug_targets (
     UNIQUE(drug_id, target_id)
 );
 
-CREATE INDEX idx_drug_targets_drug ON drug_targets(drug_id);
-CREATE INDEX idx_drug_targets_target ON drug_targets(target_id);
+CREATE INDEX IF NOT EXISTS idx_drug_targets_drug ON drug_targets(drug_id);
+CREATE INDEX IF NOT EXISTS idx_drug_targets_target ON drug_targets(target_id);
 
 -- Target-Disease relationships
 CREATE TABLE IF NOT EXISTS target_diseases (
@@ -81,8 +81,8 @@ CREATE TABLE IF NOT EXISTS target_diseases (
     UNIQUE(target_id, disease_id)
 );
 
-CREATE INDEX idx_target_diseases_target ON target_diseases(target_id);
-CREATE INDEX idx_target_diseases_disease ON target_diseases(disease_id);
+CREATE INDEX IF NOT EXISTS idx_target_diseases_target ON target_diseases(target_id);
+CREATE INDEX IF NOT EXISTS idx_target_diseases_disease ON target_diseases(disease_id);
 
 -- Cell lines table
 CREATE TABLE IF NOT EXISTS cell_lines (
@@ -97,8 +97,8 @@ CREATE TABLE IF NOT EXISTS cell_lines (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_cell_lines_disease ON cell_lines(disease_id);
-CREATE INDEX idx_cell_lines_name ON cell_lines(cell_line_name);
+CREATE INDEX IF NOT EXISTS idx_cell_lines_disease ON cell_lines(disease_id);
+CREATE INDEX IF NOT EXISTS idx_cell_lines_name ON cell_lines(cell_line_name);
 
 -- Synergy scores table
 CREATE TABLE IF NOT EXISTS synergy_scores (
@@ -117,10 +117,10 @@ CREATE TABLE IF NOT EXISTS synergy_scores (
     CHECK (drug1_id != drug2_id)
 );
 
-CREATE INDEX idx_synergy_drug1 ON synergy_scores(drug1_id);
-CREATE INDEX idx_synergy_drug2 ON synergy_scores(drug2_id);
-CREATE INDEX idx_synergy_cell_line ON synergy_scores(cell_line_id);
-CREATE INDEX idx_synergy_score ON synergy_scores(synergy_score);
+CREATE INDEX IF NOT EXISTS idx_synergy_drug1 ON synergy_scores(drug1_id);
+CREATE INDEX IF NOT EXISTS idx_synergy_drug2 ON synergy_scores(drug2_id);
+CREATE INDEX IF NOT EXISTS idx_synergy_cell_line ON synergy_scores(cell_line_id);
+CREATE INDEX IF NOT EXISTS idx_synergy_score ON synergy_scores(synergy_score);
 
 -- Side effects table
 CREATE TABLE IF NOT EXISTS side_effects (
@@ -134,8 +134,8 @@ CREATE TABLE IF NOT EXISTS side_effects (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_side_effects_drug ON side_effects(drug_id);
-CREATE INDEX idx_side_effects_name ON side_effects(effect_name);
+CREATE INDEX IF NOT EXISTS idx_side_effects_drug ON side_effects(drug_id);
+CREATE INDEX IF NOT EXISTS idx_side_effects_name ON side_effects(effect_name);
 
 -- Harmful drug combinations table
 CREATE TABLE IF NOT EXISTS harmful_combinations (
@@ -153,9 +153,9 @@ CREATE TABLE IF NOT EXISTS harmful_combinations (
     UNIQUE(drug1_id, drug2_id)
 );
 
-CREATE INDEX idx_harmful_drug1 ON harmful_combinations(drug1_id);
-CREATE INDEX idx_harmful_drug2 ON harmful_combinations(drug2_id);
-CREATE INDEX idx_harmful_severity ON harmful_combinations(severity_level);
+CREATE INDEX IF NOT EXISTS idx_harmful_drug1 ON harmful_combinations(drug1_id);
+CREATE INDEX IF NOT EXISTS idx_harmful_drug2 ON harmful_combinations(drug2_id);
+CREATE INDEX IF NOT EXISTS idx_harmful_severity ON harmful_combinations(severity_level);
 
 -- Model predictions cache (optional, for performance)
 CREATE TABLE IF NOT EXISTS prediction_cache (
@@ -171,8 +171,8 @@ CREATE TABLE IF NOT EXISTS prediction_cache (
     UNIQUE(disease_id, drug1_id, drug2_id, model_version)
 );
 
-CREATE INDEX idx_cache_disease ON prediction_cache(disease_id);
-CREATE INDEX idx_cache_expiry ON prediction_cache(expires_at);
+CREATE INDEX IF NOT EXISTS idx_cache_disease ON prediction_cache(disease_id);
+CREATE INDEX IF NOT EXISTS idx_cache_expiry ON prediction_cache(expires_at);
 
 -- Create views for common queries
 
@@ -231,8 +231,13 @@ END;
 $$ language 'plpgsql';
 
 -- Trigger for drugs table
-CREATE TRIGGER update_drugs_updated_at BEFORE UPDATE ON drugs
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_drugs_updated_at ON drugs;
+
+CREATE TRIGGER update_drugs_updated_at
+BEFORE UPDATE ON drugs
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
 
 -- Grant permissions (adjust as needed)
 -- GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO drug_synergy_user;
