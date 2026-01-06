@@ -1,0 +1,29 @@
+database:
+  driver: postgresql
+  pool_size: 10
+  max_overflow: 20
+  pool_timeout: 30
+  
+model:
+  architecture: gat
+  num_heads: 4
+  uncertainty_method: dropout
+  num_inference_passes: 10
+  
+graph:
+  node_types:
+    - drug
+    - target
+    - disease
+  edge_types:
+    - drug_target
+    - target_disease
+    - drug_disease
+    
+safety:
+  threshold_score: 0.7
+  
+api:
+  cors_origins:
+    - http://localhost:3000
+    - http://localhost:8501
